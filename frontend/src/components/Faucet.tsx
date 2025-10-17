@@ -27,7 +27,9 @@ export function Faucet() {
   const { wallets } = useWallets();
   
   // Get chainId and address from wagmi or fallback to Privy wallet
-  const chainId = wagmiChainId || parseChainId(wallets[0]?.chainId);
+  const rawChainId = wagmiChainId || parseChainId(wallets[0]?.chainId);
+  // Only use supported chains (10143: Monad, 11155111: Sepolia)
+  const chainId = rawChainId === 10143 || rawChainId === 11155111 ? rawChainId : null;
   const address = wagmiAddress || wallets[0]?.address;
   
   const [tokens, setTokens] = useState<TokenInfo[]>([]);

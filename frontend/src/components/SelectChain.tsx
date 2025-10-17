@@ -1,44 +1,52 @@
 "use client";
 
-import { useAccount } from "wagmi";
+import { useAccount, useSwitchChain } from "wagmi";
 import { useWallets } from "@privy-io/react-auth";
 import { addChainToWallet } from "@/config/chain";
 
 export default function SelectChain() {
-  const { address, chainId } = useAccount();
+  const { address, chainId: wagmiChainId } = useAccount();
   const { wallets } = useWallets();
+  const { switchChain } = useSwitchChain();
+  
+  // Only use supported chains (10143: Monad, 11155111: Sepolia)
+  const chainId = wagmiChainId === 10143 || wagmiChainId === 11155111 ? wagmiChainId : null;
 
   const handleSwitch = async (targetChainId: number) => {
     try {
-      // Tìm ví đang active - thử nhiều cách
-      let activeWallet = wallets.find(w => w.address === address);
-      
-      // Nếu không tìm thấy, thử tìm ví đầu tiên
-      if (!activeWallet && wallets.length > 0) {
-        activeWallet = wallets[0];
-      }
-      
-      if (activeWallet) {
-        // Sử dụng wallet.switchChain() cho tất cả loại ví
-        await activeWallet.switchChain(targetChainId);
-      } else {
-        throw new Error(`No active wallet found. Address: ${address}, Wallets: ${wallets.length}`);
-      }
+      // Thử sử dụng wagmi's switchChain trước
+      await switchChain({ chainId: targetChainId });
     } catch (error: unknown) {
       const err = error as { code?: number; message?: string };
-      console.error("Chain switch error:", error);
+      console.error("Wagmi switchChain failed, trying window.ethereum:", error);
       
-      // Xử lý lỗi 4902 - chain chưa được thêm vào ví
-      if (err?.code === 4902) {
-        try {
-          await addChainToWallet(targetChainId);
-        } catch (addError: unknown) {
-          const addErr = addError as { message?: string };
-          console.error("Add chain error:", addError);
-          alert(`Chain switch failed: ${err.message}\n\nFailed to add chain: ${addErr.message}`);
+      try {
+        // Fallback: sử dụng window.ethereum trực tiếp
+        await window.ethereum?.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: `0x${targetChainId.toString(16)}` }],
+        });
+      } catch (ethereumError: unknown) {
+        const ethErr = ethereumError as { code?: number; message?: string };
+        console.error("Ethereum switch failed:", ethereumError);
+        
+        // Xử lý lỗi 4902 - chain chưa được thêm vào ví
+        if (ethErr?.code === 4902) {
+          try {
+            await addChainToWallet(targetChainId);
+            // Thử switch lại sau khi thêm chain
+            await window.ethereum?.request({
+              method: 'wallet_switchEthereumChain',
+              params: [{ chainId: `0x${targetChainId.toString(16)}` }],
+            });
+          } catch (addError: unknown) {
+            const addErr = addError as { message?: string };
+            console.error("Failed to add chain:", addErr?.message || addError);
+            alert(`Chain switch failed: ${ethErr.message}\n\nFailed to add chain: ${addErr.message}`);
+          }
+        } else {
+          alert(`Chain switch failed: ${ethErr.message}`);
         }
-      } else {
-        alert(`Chain switch failed: ${err.message}`);
       }
     }
   };
@@ -59,7 +67,7 @@ export default function SelectChain() {
         Wallets: {wallets.length}
       </p>
       <select
-        value={chainId}
+        value={chainId || ""}
         onChange={(e) => handleSwitch(Number(e.target.value))}
         className="px-3 py-2 border rounded bg-white"
       >

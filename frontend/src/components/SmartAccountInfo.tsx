@@ -18,7 +18,9 @@ export function SmartAccountInfo() {
   const { wallets } = useWallets();
   
   // Get chainId from wagmi or fallback to Privy wallet
-  const chainId = wagmiChainId || parseChainId(wallets[0]?.chainId);
+  const rawChainId = wagmiChainId || parseChainId(wallets[0]?.chainId);
+  // Only use supported chains (10143: Monad, 11155111: Sepolia)
+  const chainId = rawChainId === 10143 || rawChainId === 11155111 ? rawChainId : null;
   
   const [address, setAddress] = useState("");
   const [isCreating, setIsCreating] = useState(false);

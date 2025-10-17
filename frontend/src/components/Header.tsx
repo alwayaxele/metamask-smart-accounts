@@ -20,7 +20,9 @@ export default function Header() {
   const networkDropdownRef = useRef<HTMLDivElement>(null);
 
   const displayAddress = address || wallets[0]?.address;
-  const displayChainId = wagmiChainId || parseChainId(wallets[0]?.chainId);
+  const rawChainId = wagmiChainId || parseChainId(wallets[0]?.chainId);
+  // Only use supported chains (10143: Monad, 11155111: Sepolia)
+  const displayChainId = rawChainId === 10143 || rawChainId === 11155111 ? rawChainId : null;
 
   const networks = [
     { id: 10143, name: 'Monad Testnet', icon: '/monad.svg' },
