@@ -12,9 +12,14 @@ export default function SelectChain() {
   const chainId = wagmiChainId === 10143 || wagmiChainId === 11155111 ? wagmiChainId : null;
 
   const handleSwitch = async (targetChainId: number) => {
+    if (typeof window === 'undefined' || !window.ethereum) {
+      alert("Wallet not available");
+      return;
+    }
+    
     try {
       // Force OKX wallet to switch chain
-      await window.ethereum?.request({
+      await window.ethereum.request({
         method: 'wallet_switchEthereumChain',
         params: [{ chainId: `0x${targetChainId.toString(16)}` }],
       });
@@ -32,7 +37,7 @@ export default function SelectChain() {
         try {
           await addChainToWallet(targetChainId);
           // Try switch again after adding
-          await window.ethereum?.request({
+          await window.ethereum.request({
             method: 'wallet_switchEthereumChain',
             params: [{ chainId: `0x${targetChainId.toString(16)}` }],
           });

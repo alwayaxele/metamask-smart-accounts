@@ -55,6 +55,10 @@ export async function createMetaMaskSmartAccount(chainId: number) {
   bundlerClient.entryPoint = "0x0000000071727de22e5e9d8baf0edac6f37da032";
 
   // Step 3: Wrap Privy or MetaMask provider
+  if (typeof window === 'undefined') {
+    throw new Error("This function can only be called on the client side");
+  }
+  
   const provider = window.ethereum;
   if (!provider) throw new Error("MetaMask or Privy provider not found");
 
@@ -86,6 +90,10 @@ export async function createMetaMaskSmartAccount(chainId: number) {
  * @param chainId - Chain ID (11155111 for Sepolia, 10143 for Monad)
  */
 export async function deploySmartAccount(chainId: number) {
+  if (typeof window === 'undefined') {
+    throw new Error("This function can only be called on the client side");
+  }
+  
   const provider = window.ethereum;
   if (!provider) throw new Error("MetaMask not found");
 
