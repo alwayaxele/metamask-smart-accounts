@@ -35,6 +35,49 @@ export function SmartAccountInfo() {
   const [depositAmount, setDepositAmount] = useState("");
   const [isDepositing, setIsDepositing] = useState(false);
   const [depositTxHash, setDepositTxHash] = useState("");
+  const [tokenBalance, setTokenBalance] = useState<string>("0");
+
+  // Function to get token balance
+  const getTokenBalance = async () => {
+    if (!chainId || !wallets[0]?.address) return;
+    
+    try {
+      const chain = chainId === 10143 ? monadTestnet : sepolia;
+      const publicClient = createPublicClient({
+        chain,
+        transport: http(),
+      });
+      
+      let balance: bigint;
+      
+      if (selectedToken === "native") {
+        // Get native token balance
+        balance = await publicClient.getBalance({ 
+          address: wallets[0].address as `0x${string}` 
+        });
+      } else {
+        // Get ERC20 token balance
+        balance = await publicClient.readContract({
+          address: selectedToken as `0x${string}`,
+          abi: MyTokenABI.abi,
+          functionName: "balanceOf",
+          args: [wallets[0].address as `0x${string}`],
+        }) as bigint;
+      }
+      
+      // Convert to readable format
+      const formattedBalance = (Number(balance) / Math.pow(10, 18)).toFixed(2);
+      setTokenBalance(formattedBalance);
+    } catch (err) {
+      console.error("Error fetching balance:", err);
+      setTokenBalance("0");
+    }
+  };
+
+  // Update balance when token selection changes
+  useEffect(() => {
+    getTokenBalance();
+  }, [selectedToken, chainId, wallets]);
 
   const handleInit = async () => {
     if (!chainId) {
@@ -216,7 +259,7 @@ export function SmartAccountInfo() {
   return (
     <div className="p-6 rounded-lg border border-gray-700" style={{ backgroundColor: '#101828' }}>
       <h3 className="text-xl font-bold mb-4 text-white">
-        Smart Account Overview
+        Fund Your Smart Account
       </h3>
       
       {!address ? (
@@ -315,49 +358,58 @@ export function SmartAccountInfo() {
 
           {/* Deposit to Smart Account */}
           <div className="mt-6 pt-6 border-t border-gray-700">
-            <h3 className="text-xl font-bold mb-4 text-white">
-              Fund Your Smart Account
-            </h3>
             
-            {/* Row 1: Labels */}
-            <div className="grid grid-cols-3 gap-3 mb-2">
-              <label className="text-sm text-gray-400">Select Token</label>
-              <label className="text-sm text-gray-400">Amount</label>
-              <div></div> {/* Empty space for button */}
+            {/* Row 1: Token Select and Balance */}
+            <div className="grid grid-cols-2 gap-3 mb-3">
+              {/* Token Select */}
+              <div>
+                <label className="block text-sm text-gray-400 mb-2">Select Token</label>
+                <select
+                  value={selectedToken}
+                  onChange={(e) => setSelectedToken(e.target.value)}
+                  className="w-full h-10 px-3 bg-gray-700 border border-gray-600 rounded text-white text-[16px] focus:outline-none focus:border-gray-500"
+                >
+                  {getAvailableTokens().map((token) => (
+                    <option key={token.address} value={token.address}>
+                      {token.symbol}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Balance Display */}
+              <div>
+                <label className="block text-sm text-gray-400 mb-2">Balance</label>
+                <div className="w-full h-10 px-3 bg-gray-700 border border-gray-600 rounded text-white text-[16px] flex items-center justify-end">
+                  <span className="text-white font-medium">{tokenBalance}</span>
+                </div>
+              </div>
             </div>
             
-            {/* Row 2: Inputs */}
-            <div className="grid grid-cols-3 gap-3 mb-3">
-              {/* Token Select */}
-              <select
-                value={selectedToken}
-                onChange={(e) => setSelectedToken(e.target.value)}
-                className="h-10 px-3 bg-gray-700 border border-gray-600 rounded text-white text-[16px] focus:outline-none focus:border-gray-500"
-              >
-                {getAvailableTokens().map((token) => (
-                  <option key={token.address} value={token.address}>
-                    {token.symbol}
-                  </option>
-                ))}
-              </select>
-
+            {/* Row 2: Amount and Deposit */}
+            <div className="grid grid-cols-2 gap-3 mb-3">
               {/* Amount Input */}
-              <input
-                type="text"
-                value={depositAmount}
-                onChange={(e) => setDepositAmount(e.target.value)}
-                placeholder="0.0"
-                className="h-10 px-3 bg-gray-700 border border-gray-600 rounded text-white placeholder-gray-400 text-[16px] focus:outline-none focus:border-gray-500"
-              />
+              <div>
+                <label className="block text-sm text-gray-400 mb-2">Amount</label>
+                <input
+                  type="text"
+                  value={depositAmount}
+                  onChange={(e) => setDepositAmount(e.target.value)}
+                  placeholder="0.0"
+                  className="w-full h-10 px-3 bg-gray-700 border border-gray-600 rounded text-white placeholder-gray-400 text-[16px] focus:outline-none focus:border-gray-500"
+                />
+              </div>
 
               {/* Deposit Button */}
-              <button
-                onClick={handleDeposit}
-                disabled={isDepositing || !depositAmount}
-                className="h-10 px-4 bg-purple-600 border border-gray-600 hover:bg-purple-700 rounded disabled:opacity-50 transition-colors text-white text-[16px] flex items-center justify-center"
-              >
-                {isDepositing ? "Depositing..." : "Deposit"}
-              </button>
+              <div className="flex items-end">
+                <button
+                  onClick={handleDeposit}
+                  disabled={isDepositing || !depositAmount}
+                  className="w-full h-10 px-4 bg-purple-600 border border-gray-600 hover:bg-purple-700 rounded disabled:opacity-50 transition-colors text-white text-[16px] flex items-center justify-center"
+                >
+                  {isDepositing ? "Depositing..." : "Deposit"}
+                </button>
+              </div>
             </div>
 
             {/* Transaction Hash */}

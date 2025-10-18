@@ -204,6 +204,27 @@ export function SendUserOperation() {
         Transfer with Smart Account
       </h3>
       
+      {/* Steps Guide */}
+      <div className="mb-6 p-4 bg-gray-800/50 border border-gray-600 rounded-lg">
+        <div className="flex flex-col items-center gap-3">
+          {/* Numbers row */}
+          <div className="flex items-center justify-center gap-16 text-sm">
+            <span className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">1</span>
+            <span className="text-gray-400 text-2xl font-bold">→</span>
+            <span className="w-8 h-8 bg-purple-600 text-white rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">2</span>
+            <span className="text-gray-400 text-2xl font-bold">→</span>
+            <span className="w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">3</span>
+          </div>
+          
+          {/* Labels row */}
+          <div className="flex items-center justify-center gap-16 text-sm">
+            <span className="text-blue-400 font-medium text-center w-28">Faucet to OEA Wallet</span>
+            <span className="text-purple-400 font-medium text-center w-28">Fund To Smart Account</span>
+            <span className="text-green-400 font-medium text-center w-28">Transfer with Smart Account</span>
+          </div>
+        </div>
+      </div>
+      
       <div className="space-y-4">
         {!chainId && (
           <div className="p-3 bg-yellow-900/20 border border-yellow-500 rounded">
