@@ -1,5 +1,5 @@
 import { Implementation, toMetaMaskSmartAccount } from "@metamask/delegation-toolkit";
-import { createPublicClient, createWalletClient, http, custom } from "viem";
+import { createPublicClient, createWalletClient, http, custom, keccak256, toHex } from "viem";
 import { createBundlerClient } from "viem/account-abstraction";
 import { monadTestnet } from "./wagmi";
 import { sepolia } from "wagmi/chains";
@@ -73,12 +73,14 @@ export async function createMetaMaskSmartAccount(chainId: number) {
     transport: custom(provider),
   });
 
-  // Step 5: Create MetaMask Smart Account
+  // Step 5: Create MetaMask Smart Account with unique salt per EOA
+  const salt = keccak256(toHex(address)); // Unique salt per EOA address
+  
   const smartAccount = await toMetaMaskSmartAccount({
     client: publicClient,
     implementation: Implementation.Hybrid,
     deployParams: [address, [], [], []],
-    deploySalt: "0x02",
+    deploySalt: salt, // Unique per EOA
     signer: { walletClient },
   });
   
@@ -114,12 +116,14 @@ export async function deploySmartAccount(chainId: number) {
     transport: custom(provider),
   });
 
-  // Tạo Smart Account (counterfactual)
+  // Tạo Smart Account (counterfactual) với unique salt per EOA
+  const salt = keccak256(toHex(address)); // Unique salt per EOA address
+  
   const smartAccount = await toMetaMaskSmartAccount({
     client: publicClient,
     implementation: Implementation.Hybrid,
     deployParams: [address, [], [], []],
-    deploySalt: "0x02",
+    deploySalt: salt, // Unique per EOA
     signer: { walletClient },
   });
 
