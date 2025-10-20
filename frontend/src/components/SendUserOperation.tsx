@@ -199,7 +199,7 @@ export function SendUserOperation() {
   };
 
   return (
-    <div className="p-6 rounded-lg border border-gray-700" style={{ backgroundColor: '#101828' }}>
+    <div className="p-6 rounded-lg border border-gray-700" style={{ backgroundColor: '#1B282F' }}>
       <h3 className="text-xl font-bold mb-4 text-white">
         Transfer with Smart Account
       </h3>
@@ -211,7 +211,7 @@ export function SendUserOperation() {
           <div className="flex items-center justify-center gap-16 text-sm">
             <span className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">1</span>
             <span className="text-gray-400 text-2xl font-bold">→</span>
-            <span className="w-8 h-8 bg-purple-600 text-white rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">2</span>
+            <span className="w-8 h-8 bg-[#FF6A00] text-white rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">2</span>
             <span className="text-gray-400 text-2xl font-bold">→</span>
             <span className="w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">3</span>
           </div>
@@ -278,7 +278,7 @@ export function SendUserOperation() {
           <button
             onClick={handleSendTx}
             disabled={isSending || !recipient || !amount || !chainId}
-            className="h-10 px-4 bg-purple-600 border border-gray-600 hover:bg-purple-700 rounded disabled:opacity-50 transition-colors text-white text-[16px] flex items-center justify-center"
+            className="h-10 px-4 bg-[#FF6A00] border border-gray-600 hover:bg-[#E55A00] rounded disabled:opacity-50 transition-colors text-white text-[16px] flex items-center justify-center"
           >
             {isSending ? "Sending..." : "Send"}
           </button>

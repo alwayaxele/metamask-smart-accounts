@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #1B2535;
-  --foreground: #ffffff;
+  --background: #FAFAFA;
+  --foreground: #1B2535;
 }
 
 @theme inline {
@@ -14,8 +14,8 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #1B2535;
-    --foreground: #ffffff;
+    --background: #FAFAFA;
+    --foreground: #1B2535;
   }
 }
 
@@ -29,6 +29,7 @@ body {
 
 * {
   box-sizing: border-box;
+  font-family: 'Inter', 'Helvetica Now', 'Roboto', sans-serif;
 }
 
 /* Improve font rendering for better readability */
@@ -38,6 +39,12 @@ h1, h2, h3, h4, h5, h6 {
   letter-spacing: -0.02em;
 }
 
-button, input, select, textarea {
+/* Ensure all text elements use consistent font */
+p, span, div, a, li, ul, ol {
+  font-family: 'Inter', 'Helvetica Now', 'Roboto', sans-serif;
+}
+
+/* Override any potential font inconsistencies */
+.text-sm, .text-xs, .text-base, .text-lg, .text-xl, .text-2xl {
   font-family: 'Inter', 'Helvetica Now', 'Roboto', sans-serif;
 }

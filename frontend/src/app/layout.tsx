@@ -1,7 +1,6 @@
 import "./globals.css";
 import Providers from "./providers";
 import Header from "@/components/Header";
-import Footer from "@/components/Footer";
 
 export const metadata = {
   title: "Monad Boost - Smart Account Wallet",
@@ -22,7 +21,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
       </head>
-      <body className="min-h-screen flex flex-col text-white" style={{ backgroundColor: '#1B2535', fontFamily: "'Inter', 'Helvetica Now', 'Roboto', sans-serif" }} suppressHydrationWarning={true}>
+      <body className="min-h-screen flex flex-col text-gray-800" style={{ backgroundColor: '#FAFAFA', fontFamily: "'Inter', 'Helvetica Now', 'Roboto', sans-serif" }} suppressHydrationWarning={true}>
         <Providers>
           <div className="flex flex-col min-h-screen">
             <Header />
@@ -31,7 +30,6 @@ export default function RootLayout({
                 {children}
               </div>
             </main>
-            <Footer />
           </div>
         </Providers>
       </body>

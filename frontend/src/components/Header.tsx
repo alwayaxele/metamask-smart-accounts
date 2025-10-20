@@ -108,11 +108,11 @@ export default function Header() {
   };
 
   return (
-    <header className="w-full bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 border-b border-gray-700 shadow-xl">
+    <header className="w-full bg-[#FAFAFA] border-b border-gray-300 shadow-lg">
       <div className="max-w-[80%] mx-auto py-5 px-8 flex items-center">
         {/* Logo */}
         <Link href="/" className="flex items-center hover:opacity-80 transition-opacity">
-          <span className="text-white font-bold text-[32px] tracking-tight leading-none">
+          <span className="text-gray-800 font-bold text-[32px] tracking-tight leading-none">
             Monad Boost
           </span>
         </Link>
@@ -121,34 +121,44 @@ export default function Header() {
         <nav className="flex gap-4 ml-8">
           <Link 
             href="/"
-            className={`text-[16px] transition-colors duration-200 font-medium px-4 py-2 rounded focus:outline-none active:border-gray-600 ${
+            className={`text-[16px] transition-colors duration-200 font-bold px-4 py-2 rounded-lg focus:outline-none ${
               pathname === '/' 
-                ? 'text-white border border-gray-600' 
-                : 'text-gray-400 hover:text-white border border-transparent'
+                ? 'text-gray-800 bg-white border border-gray-300 shadow-md' 
+                : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50 border border-transparent'
             }`}
           >
-            Dashboard
+            Smart Account
           </Link>
           <Link 
-            href="/faucet"
-            className={`text-[16px] transition-colors duration-200 font-medium px-4 py-2 rounded focus:outline-none active:border-gray-600 ${
-              pathname === '/faucet' 
-                ? 'text-white border border-gray-600' 
-                : 'text-gray-400 hover:text-white border border-transparent'
+            href="/envio"
+            className={`text-[16px] transition-colors duration-200 font-bold px-4 py-2 rounded-lg focus:outline-none ${
+              pathname === '/envio' 
+                ? 'text-gray-800 bg-white border border-gray-300 shadow-md' 
+                : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50 border border-transparent'
             }`}
           >
-            Faucet
+            Envio Checker
           </Link>
         </nav>
 
         {/* Right Section */}
         <div className="ml-auto"></div>
         <div className="flex items-center gap-4">
+          <Link 
+            href="/faucet"
+            className={`text-[16px] transition-colors duration-200 font-bold px-4 py-2 rounded-lg focus:outline-none ${
+              pathname === '/faucet' 
+                ? 'text-gray-800 bg-white border border-gray-300 shadow-md' 
+                : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50 border border-transparent'
+            }`}
+          >
+            Faucet
+          </Link>
           {authenticated && (
             <div className="relative" ref={networkDropdownRef}>
               <button
                 onClick={() => setIsNetworkDropdownOpen(!isNetworkDropdownOpen)}
-                className="h-10 px-[10px] text-[16px] bg-gray-800/80 backdrop-blur-sm border border-gray-600 rounded text-white hover:bg-gray-700 transition-all duration-200 shadow-lg flex items-center gap-2"
+                className="h-10 px-[10px] text-[16px] bg-white border border-gray-300 rounded-lg text-gray-800 hover:bg-gray-50 transition-all duration-200 shadow-md flex items-center gap-2"
               >
                 <Image 
                   src={currentNetwork.icon} 
@@ -164,13 +174,13 @@ export default function Header() {
               </button>
 
               {isNetworkDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-56 bg-gray-800/95 backdrop-blur-md rounded-xl shadow-2xl border border-gray-700 overflow-hidden z-50">
+                <div className="absolute right-0 mt-2 w-56 bg-white backdrop-blur-md rounded-xl shadow-xl border border-gray-300 overflow-hidden z-50">
                   {networks.map((network) => (
                     <button
                       key={network.id}
                       onClick={() => handleSwitchChain(network.id)}
-                      className={`w-full h-10 px-4 text-[16px] flex items-center gap-3 hover:bg-gray-700 transition-colors ${
-                        network.id === displayChainId ? 'bg-gray-700/50' : ''
+                      className={`w-full h-10 px-4 text-[16px] flex items-center gap-3 hover:bg-gray-100 transition-colors ${
+                        network.id === displayChainId ? 'bg-gray-100' : ''
                       }`}
                     >
                       <Image 
@@ -180,7 +190,7 @@ export default function Header() {
                         height={20}
                         className="w-5 h-5"
                       />
-                      <span className="text-white">{network.name}</span>
+                      <span className="text-gray-800">{network.name}</span>
                       {network.id === displayChainId && (
                         <svg className="w-5 h-5 ml-auto text-green-500" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
@@ -196,7 +206,7 @@ export default function Header() {
           {!authenticated ? (
             <button
               onClick={login}
-              className="h-10 px-6 text-[16px] bg-gray-800/80 backdrop-blur-sm border border-gray-600 text-white font-semibold rounded hover:bg-gray-700 transition-all duration-200 shadow-lg flex items-center justify-center"
+              className="h-10 px-6 text-[16px] bg-white border border-gray-300 text-gray-800 font-semibold rounded-lg hover:bg-gray-50 transition-all duration-200 shadow-md flex items-center justify-center"
             >
               Connect Wallet
             </button>
@@ -204,22 +214,22 @@ export default function Header() {
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setIsWalletDropdownOpen(!isWalletDropdownOpen)}
-                className="h-10 px-4 text-[16px] bg-gray-800/80 backdrop-blur-sm border border-gray-600 text-white rounded hover:bg-gray-700 transition-all duration-200 shadow-lg flex items-center justify-center"
+                className="h-10 px-4 text-[16px] bg-white border border-gray-300 text-gray-800 rounded-lg hover:bg-gray-50 transition-all duration-200 shadow-md flex items-center justify-center"
               >
                 <span className="font-mono">{formatAddress(displayAddress)}</span>
               </button>
               
               {isWalletDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-[180px] bg-gray-800/95 backdrop-blur-md rounded-xl shadow-2xl border border-gray-700 overflow-hidden z-50">
-                  <div className="px-4 py-3 border-b border-gray-700">
+                <div className="absolute right-0 mt-2 w-[180px] bg-white backdrop-blur-md rounded-xl shadow-xl border border-gray-300 overflow-hidden z-50">
+                  <div className="px-4 py-3 border-b border-gray-300">
                     <div className="flex items-center justify-between">
-                      <span className="text-[16px] text-white font-mono">{formatAddress(displayAddress)}</span>
+                      <span className="text-[16px] text-gray-800 font-mono">{formatAddress(displayAddress)}</span>
                       <button
                         onClick={copyAddress}
-                        className="p-1 hover:bg-gray-700 rounded transition-colors duration-200"
+                        className="p-1 hover:bg-gray-100 rounded transition-colors duration-200"
                         title="Copy"
                       >
-                        <svg className="w-4 h-4 text-gray-400 hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4 text-gray-500 hover:text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                         </svg>
                       </button>
@@ -242,7 +252,7 @@ export default function Header() {
           ) : (
             <button
               onClick={logout}
-              className="h-10 px-6 text-[16px] bg-gray-800/80 backdrop-blur-sm border border-gray-600 text-white font-semibold rounded hover:bg-gray-700 transition-all duration-200 shadow-lg flex items-center justify-center"
+              className="h-10 px-6 text-[16px] bg-white border border-gray-300 text-gray-800 font-semibold rounded-lg hover:bg-gray-50 transition-all duration-200 shadow-md flex items-center justify-center"
             >
               Logout
             </button>

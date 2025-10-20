@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { usePrivy, useWallets } from "@privy-io/react-auth";
 import { useAccount } from "wagmi";
 import { createMetaMaskSmartAccount, deploySmartAccount } from "@/config/smartAccount";
@@ -38,7 +38,7 @@ export function SmartAccountInfo() {
   const [tokenBalance, setTokenBalance] = useState<string>("0");
 
   // Function to get token balance
-  const getTokenBalance = async () => {
+  const getTokenBalance = useCallback(async () => {
     if (!chainId || !wallets[0]?.address) return;
     
     try {
@@ -72,14 +72,14 @@ export function SmartAccountInfo() {
       console.error("Error fetching balance:", err);
       setTokenBalance("0");
     }
-  };
+  }, [chainId, wallets, selectedToken]);
 
   // Update balance when token selection changes
   useEffect(() => {
     getTokenBalance();
-  }, [selectedToken, chainId, wallets]);
+  }, [selectedToken, chainId, wallets, getTokenBalance]);
 
-  const handleInit = async () => {
+  const handleInit = useCallback(async () => {
     if (!chainId) {
       setError("Please connect wallet and select a network!");
       return;
@@ -106,7 +106,7 @@ export function SmartAccountInfo() {
     } finally {
       setIsCreating(false);
     }
-  };
+  }, [chainId]);
 
   const handleDeploy = async () => {
     if (!address) {
@@ -250,14 +250,14 @@ export function SmartAccountInfo() {
       // Re-initialize with new chainId
       handleInit();
     }
-  }, [authenticated, chainId]);
+  }, [authenticated, chainId, handleInit]);
 
   if (!authenticated) {
     return null;
   }
 
   return (
-    <div className="p-6 rounded-lg border border-gray-700" style={{ backgroundColor: '#101828' }}>
+    <div className="p-6 rounded-lg border border-gray-700" style={{ backgroundColor: '#1B282F' }}>
       <h3 className="text-xl font-bold mb-4 text-white">
         Fund Your Smart Account
       </h3>
@@ -265,7 +265,7 @@ export function SmartAccountInfo() {
       {!address ? (
         <div>
           <p className="text-white mb-4">
-            <strong>Step 1:</strong> Initialize Smart Account (counterfactual address)
+            <strong>Step 1:</strong> Initialize Smart Account (predicted address)
           </p>
           {!chainId && (
             <div className="mb-3 p-3 bg-yellow-900/20 border border-yellow-500 rounded">
@@ -275,7 +275,7 @@ export function SmartAccountInfo() {
           <button
             onClick={handleInit}
             disabled={isCreating || !chainId}
-            className="h-10 px-4 bg-orange-500 border border-gray-600 hover:bg-orange-600 rounded disabled:opacity-50 transition-colors text-white text-[16px] flex items-center justify-center"
+            className="h-10 px-4 bg-[#FF6A00] border border-gray-600 hover:bg-[#E55A00] rounded disabled:opacity-50 transition-colors text-white text-[16px] flex items-center justify-center"
           >
             {isCreating ? "Creating..." : "Initialize Smart Account"}
           </button>
@@ -291,8 +291,16 @@ export function SmartAccountInfo() {
           {/* Address Row */}
           <div className="mb-3">
             <div className="flex items-center justify-between">
-              <span className="text-white text-[16px]">Address:</span>
+              <span className="text-white text-[16px]">Smart Account:</span>
               <span className="text-white text-[16px] font-mono">{address}</span>
+            </div>
+          </div>
+          
+          {/* EOA Address Row */}
+          <div className="mb-3">
+            <div className="flex items-center justify-between">
+              <span className="text-white text-[16px]">EOA Address:</span>
+              <span className="text-white text-[16px] font-mono">{wallets[0]?.address || address}</span>
             </div>
           </div>
           
@@ -320,7 +328,7 @@ export function SmartAccountInfo() {
               {isDeployed ? (
                 <span className="text-green-500 text-[16px]">✅ Deployed</span>
               ) : (
-                <span className="text-yellow-500 text-[16px]">⚠️ Counterfactual</span>
+                <span className="text-yellow-500 text-[16px]">⚠️ Not Deployed</span>
               )}
             </div>
           </div>
@@ -333,7 +341,7 @@ export function SmartAccountInfo() {
               <button
                 onClick={handleDeploy}
                 disabled={isDeploying}
-                className="w-full h-10 px-4 bg-blue-600 border border-gray-600 hover:bg-blue-700 rounded disabled:opacity-50 transition-colors text-white text-[16px] flex items-center justify-center"
+                className="w-full h-10 px-4 bg-[#FF6A00] border border-gray-600 hover:bg-[#E55A00] rounded disabled:opacity-50 transition-colors text-white text-[16px] flex items-center justify-center"
               >
                 {isDeploying ? "Deploying..." : "Deploy Smart Account"}
               </button>
@@ -405,7 +413,7 @@ export function SmartAccountInfo() {
                 <button
                   onClick={handleDeposit}
                   disabled={isDepositing || !depositAmount}
-                  className="w-full h-10 px-4 bg-purple-600 border border-gray-600 hover:bg-purple-700 rounded disabled:opacity-50 transition-colors text-white text-[16px] flex items-center justify-center"
+                  className="w-full h-10 px-4 bg-[#FF6A00] border border-gray-600 hover:bg-[#E55A00] rounded disabled:opacity-50 transition-colors text-white text-[16px] flex items-center justify-center"
                 >
                   {isDepositing ? "Depositing..." : "Deposit"}
                 </button>
