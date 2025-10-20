@@ -38,34 +38,6 @@ export function Faucet() {
   const [error, setError] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Helper function to add delay between requests
-  const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
-  // Helper function to retry contract calls with exponential backoff
-  const retryContractCall = async <T,>(
-    callFn: () => Promise<T>,
-    maxRetries: number = 3,
-    baseDelay: number = 1000
-  ): Promise<T> => {
-    for (let attempt = 0; attempt < maxRetries; attempt++) {
-      try {
-        return await callFn();
-      } catch (error: unknown) {
-        const isRateLimited = (error as { code?: number; message?: string })?.code === -32011 || 
-          (error as { message?: string })?.message?.includes('requests limited');
-        
-        if (isRateLimited && attempt < maxRetries - 1) {
-          const delayMs = baseDelay * Math.pow(2, attempt); // Exponential backoff
-          await delay(delayMs);
-          continue;
-        }
-        
-        throw error;
-      }
-    }
-    throw new Error('Max retries exceeded');
-  };
-
   const loadTokenInfo = useCallback(async () => {
     setIsRefreshing(true);
     try {
@@ -110,6 +82,34 @@ export function Faucet() {
       });
 
       const appHubAddress = appHubData.address as `0x${string}`;
+      
+      // Helper function to add delay between requests
+      const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+      // Helper function to retry contract calls with exponential backoff
+      const retryContractCall = async <T,>(
+        callFn: () => Promise<T>,
+        maxRetries: number = 3,
+        baseDelay: number = 1000
+      ): Promise<T> => {
+        for (let attempt = 0; attempt < maxRetries; attempt++) {
+          try {
+            return await callFn();
+          } catch (error: unknown) {
+            const isRateLimited = (error as { code?: number; message?: string })?.code === -32011 || 
+              (error as { message?: string })?.message?.includes('requests limited');
+            
+            if (isRateLimited && attempt < maxRetries - 1) {
+              const delayMs = baseDelay * Math.pow(2, attempt); // Exponential backoff
+              await delay(delayMs);
+              continue;
+            }
+            
+            throw error;
+          }
+        }
+        throw new Error('Max retries exceeded');
+      };
       
       // Load info for each token sequentially to avoid rate limiting
       const tokensWithInfo = [];
@@ -181,14 +181,14 @@ export function Faucet() {
     } finally {
       setIsRefreshing(false);
     }
-  }, [chainId, address, retryContractCall, delay]);
+  }, [chainId, address]);
 
   // Load token info
   useEffect(() => {
     if (chainId && address) {
       loadTokenInfo();
     }
-  }, [chainId, address, loadTokenInfo]);
+  }, [chainId, address]);
 
   const handleClaim = async (tokenAddress: string, symbol: string) => {
     if (!address) {

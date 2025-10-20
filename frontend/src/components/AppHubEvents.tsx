@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
+import { TokenAddresses } from "@/abi/contracts";
 
 interface EventData {
   id: string;
@@ -23,6 +24,21 @@ export default function AppHubEvents() {
   const ENVIO_GRAPHQL = "https://indexer.dev.hyperindex.xyz/a4728f5/v1/graphql";
 
   // ========== Helper functions ==========
+  // Helper function to get token symbol from address
+  const getTokenSymbol = (tokenAddress: string) => {
+    // Search through all chains and tokens
+    for (const chainId in TokenAddresses) {
+      const chain = TokenAddresses[chainId as keyof typeof TokenAddresses];
+      for (const tokenSymbol in chain.tokens) {
+        const token = chain.tokens[tokenSymbol as keyof typeof chain.tokens];
+        if (token.address.toLowerCase() === tokenAddress.toLowerCase()) {
+          return token.symbol;
+        }
+      }
+    }
+    return "TOKEN";
+  };
+
   const formatTokenAmount = (amount: string) => {
     const num = Number(amount);
     if (isNaN(num)) return amount;
@@ -63,6 +79,13 @@ export default function AppHubEvents() {
     AppHub_FaucetTokenAdded(limit: 5, order_by: { amount: desc }) {
       token
       amount
+    }
+    AppHub_TransferExecuted(limit: 5, order_by: { timestamp: desc }) {
+      user
+      token
+      to
+      amount
+      timestamp
     }
   }`;
 
@@ -107,6 +130,7 @@ export default function AppHubEvents() {
       pushEvents(data.AppHub_FaucetClaimed || [], "FaucetClaimed");
       pushEvents(data.AppHub_AccountDeployed || [], "AccountDeployed");
       pushEvents(data.AppHub_FaucetTokenAdded || [], "FaucetTokenAdded");
+      pushEvents(data.AppHub_TransferExecuted || [], "TransferExecuted");
 
       merged.sort(
         (a, b) => Number(b.timestamp || 0) - Number(a.timestamp || 0)
@@ -175,7 +199,7 @@ export default function AppHubEvents() {
                     >
                       {formatAddress(e.token!)}
                     </a>{" "}
-                    | amount {formatTokenAmount(e.amount || "0")}
+                    ({getTokenSymbol(e.token!)}) | amount {formatTokenAmount(e.amount || "0")}
                   </p>
                 )}
 
@@ -189,13 +213,34 @@ export default function AppHubEvents() {
                     >
                       {formatAddress(e.user!)}
                     </a>{" "}
-                    claimed {formatTokenAmount(e.amount || "0")} from{" "}
+                    claimed {formatTokenAmount(e.amount || "0")} {getTokenSymbol(e.token!)} from{" "}
                     <a
                       href={getExplorerUrl(e.token!)}
                       target="_blank"
                       className="text-blue-600 underline hover:text-blue-800"
                     >
                       {formatAddress(e.token!)}
+                    </a>
+                  </p>
+                )}
+
+                {e.type === "TransferExecuted" && (
+                  <p className="text-sm text-white">
+                    🔁{" "}
+                    <a
+                      href={getExplorerUrl(e.user!)}
+                      target="_blank"
+                      className="text-blue-600 underline hover:text-blue-800"
+                    >
+                      {formatAddress(e.user!)}
+                    </a>{" "}
+                    sent {formatTokenAmount(e.amount || "0")} {getTokenSymbol(e.token!)} to{" "}
+                    <a
+                      href={getExplorerUrl(e.to!)}
+                      target="_blank"
+                      className="text-blue-600 underline hover:text-blue-800"
+                    >
+                      {formatAddress(e.to!)}
                     </a>
                   </p>
                 )}

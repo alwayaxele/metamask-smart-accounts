@@ -8,6 +8,7 @@ import { createMetaMaskSmartAccount } from "@/config/smartAccount";
 import { parseChainId, getExplorerUrl } from "@/lib/utils";
 import { getTokens } from "@/abi/TokenAddresses";
 import { MyTokenABI } from "@/abi/MyTokenABI";
+import { AppHubABI, AppHubAddresses } from "@/abi/contracts";
 
 export function SendUserOperation() {
   const { chainId: wagmiChainId } = useAccount();
@@ -76,32 +77,38 @@ export function SendUserOperation() {
         ];
         
       } else {
-        // Send ERC20 token with batch: approve + transfer
-        const saAddress = await smartAccount.getAddress();
+        // Send ERC20 token via AppHub contract to emit TransferExecuted event
+        const appHubData = AppHubAddresses[chainId.toString() as keyof typeof AppHubAddresses];
         
-        // Step 1: Approve Smart Account to spend tokens
-        const approveData = encodeFunctionData({
+        if (!appHubData) {
+          throw new Error(`AppHub not deployed on chain ${chainId}`);
+        }
+        
+        const appHubAddress = appHubData.address;
+        
+        // Step 1: Approve AppHub to spend tokens
+        const approveAppHub = encodeFunctionData({
           abi: MyTokenABI.abi,
           functionName: "approve",
-          args: [saAddress, parseEther(amount)],
+          args: [appHubAddress as `0x${string}`, parseEther(amount)],
         });
         
-        // Step 2: Transfer from Smart Account to recipient
-        const transferData = encodeFunctionData({
-          abi: MyTokenABI.abi,
-          functionName: "transfer",
-          args: [recipient as `0x${string}`, parseEther(amount)],
+        // Step 2: Transfer via AppHub to emit TransferExecuted event
+        const transferViaAppHub = encodeFunctionData({
+          abi: AppHubABI.abi,
+          functionName: "transferToken",
+          args: [selectedToken as `0x${string}`, recipient as `0x${string}`, parseEther(amount)],
         });
         
         calls = [
           {
             to: selectedToken as `0x${string}`,
-            data: approveData,  // approve SA to spend
+            data: approveAppHub,  // approve AppHub to spend
             value: BigInt(0),
           },
           {
-            to: selectedToken as `0x${string}`,
-            data: transferData,  // transfer from SA to recipient
+            to: appHubAddress as `0x${string}`,
+            data: transferViaAppHub,  // transfer via AppHub to emit event
             value: BigInt(0),
           },
         ];
